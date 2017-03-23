@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequiredArgsConstructor
 public class Controller {
+	// created by TraceWebAsyncClientAutoConfiguration
 	private final AsyncRestOperations traceAsyncRestTemplate;
 	
 	@Value("${server.port}")
@@ -19,7 +20,7 @@ public class Controller {
 	
 	@RequestMapping(value = "/bean")
 	public HogeBean bean() {
-		log.info("I got /bean request!");
+		log.info("(/bean) I got a request!");
 		return HogeBean.builder()
 				.name("test")
 				.age(18)
@@ -28,13 +29,13 @@ public class Controller {
 	
 	@RequestMapping(value = "/async-test")
 	public void asyncTest() {
-		log.info("I got /async-test request!");
+		log.info("(/async-test) I got a request!");
 		
 		traceAsyncRestTemplate.getForEntity("http://localhost:" + port + "/bean", HogeBean.class)
 			.addCallback(success -> {
-				log.info("success");
+				log.info("(/async-test) success");
 			}, failure -> {
-				log.error("failure", failure);
+				log.error("(/async-test) failure", failure);
 			});
 	}
 }
