@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.AsyncRestTemplate;
 
@@ -16,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 public class Controller {
 	// created by TraceWebAsyncClientAutoConfiguration
 	private final AsyncRestTemplate traceAsyncRestTemplate;
+	
+	private final Task task;
 		
 	@Value("${server.port}")
 	private String port;
@@ -33,23 +36,30 @@ public class Controller {
 				.build();
 	}
 	
-	@RequestMapping(value = "/async-test")
-	public void asyncTest() throws InterruptedException {
-		log.info("(/async-test) I got a request!");
+	@RequestMapping(value = "/trace-async-rest-template")
+	public void asyncTest(@RequestParam(required = false) boolean isSleep) throws InterruptedException {
+		log.info("(/trace-async-rest-template) I got a request!");
 		
 		ListenableFuture<ResponseEntity<HogeBean>> res = traceAsyncRestTemplate.getForEntity("http://localhost:" + port + "/bean", HogeBean.class);
 		
-		if (activatesSleep) {
+		if (isSleep) {
 			Thread.sleep(1000);
 		}
 		
 		res.addCallback(
 				success -> {
-					log.info("(/async-test) success");
+					log.info("(/trace-async-rest-template) success");
 					},
 				failure -> {
-					log.error("(/async-test) failure", failure);
+					log.error("(/trace-async-rest-template) failure", failure);
 					}
 				);
+	}
+	
+	@RequestMapping(value = "/async-annotation")
+	public void asyncTest2() throws InterruptedException {
+		log.info("(/async-annotation) start");
+		task.doSomething();
+		log.info("(/async-annotation) end");
 	}
 }
